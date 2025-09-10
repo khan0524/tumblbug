@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>텀블벅 패션 트렌드 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: A dashboard-style single-page application with a top navigation bar (개요, 키워드 분석, 전략 제안) to allow users to jump to specific sections. This non-linear structure enhances usability by letting users explore data based on their interests rather than following the linear flow of the original report. The 'Keyword Analysis' section is further organized with tabs to manage the high density of information, preventing user overload and making detailed exploration intuitive. This design prioritizes clarity and user-driven discovery. -->
+    <!-- Visualization & Content Choices: 
+        - Overall Trend: Goal: Compare. Method: Bar Chart (Chart.js) for a clear 2024 vs. 2025 funding comparison. Interaction: Tooltips on hover. Justification: Most direct way to visualize a change in a key metric.
+        - Top Projects: Goal: Compare/Rank. Method: Horizontal Bar Chart (Chart.js). Interaction: Tooltips for detailed funding/backer info. Justification: Ideal for ranked lists with long labels.
+        - Keyword Value: Goal: Show Proportions. Method: Doughnut Chart (Chart.js). Interaction: Hover to see segment details. Justification: Effectively shows the contribution of each keyword to the whole.
+        - Keyword Growth/Frequency: Goal: Compare. Method: Horizontal Bar Charts. Interaction: Tooltips for precise values. Justification: Best for comparing magnitudes across categories.
+        - Keyword Efficiency & Strategies: Goal: Inform/Organize. Method: Styled HTML cards with Tailwind CSS. Interaction: None needed. Justification: Clear, structured text presentation is most effective for this qualitative and multi-point data.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F7F4;
+            color: #383838;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #1E6B82;
+            border-bottom-color: #1E6B82;
+        }
+        .tab-link {
+            transition: color 0.3s, background-color 0.3s;
+        }
+        .tab-link.active {
+            background-color: #1E6B82;
+            color: #FFFFFF;
+        }
+        .kpi-card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl md:text-2xl font-bold text-[#1E6B82]">📊 텀블벅 패션 트렌드</h1>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">개요</a>
+                        <a href="#keywords" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">키워드 분석</a>
+                        <a href="#strategy" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">전략 및 시사점</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section id="overview" class="mb-16 scroll-mt-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800 leading-tight">패션, 2025년 -27% 후퇴… 전통·프리미엄 소품이 버팀목</h2>
+                <p class="mt-4 text-lg text-gray-500 max-w-3xl mx-auto">2025년 상반기 텀블벅 패션 카테고리는 전반적인 규모 축소를 경험했지만, 특정 키워드에서는 견고한 성장세를 보였습니다. 이 대시보드는 주요 데이터와 인사이트를 통해 현재 시장 상황을 진단하고 미래 전략을 탐색합니다.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+                <div class="kpi-card p-6">
+                    <h3 class="text-md font-semibold text-gray-500">총 펀딩액 (2025.01-08)</h3>
+                    <p class="text-4xl font-bold text-[#1E6B82] mt-2">61.6<span class="text-2xl ml-1">억 원</span></p>
+                </div>
+                <div class="kpi-card p-6">
+                    <h3 class="text-md font-semibold text-gray-500">전년 대비 성장률</h3>
+                    <p class="text-4xl font-bold text-red-500 mt-2">-27.2%</p>
+                </div>
+                <div class="kpi-card p-6">
+                    <h3 class="text-md font-semibold text-gray-500">총 프로젝트 수 (2025)</h3>
+                    <p class="text-4xl font-bold text-[#1E6B82] mt-2">1,177<span class="text-2xl ml-1">개</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="kpi-card p-6">
+                    <h3 class="text-xl font-bold text-center mb-4">연간 총 펀딩액 비교 (억 원)</h3>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="fundingComparisonChart"></canvas>
+                    </div>
+                </div>
+                <div class="kpi-card p-6">
+                    <h3 class="text-xl font-bold text-center mb-4">2025년 Top 5 프로젝트 (억 원)</h3>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="topProjectsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="keywords" class="mb-16 scroll-mt-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">핵심 키워드 분석</h2>
+                <p class="mt-4 text-lg text-gray-500 max-w-3xl mx-auto">시장의 변화를 주도하는 키워드는 무엇일까요? 펀딩 가치, 빈도, 성장률, 효율성 네 가지 관점에서 키워드 데이터를 심층 분석하여 트렌드의 핵심을 파헤칩니다.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-2 mb-8 max-w-lg mx-auto">
+                <div id="keyword-tabs" class="flex justify-center space-x-1">
+                    <button data-tab="value" class="tab-link active w-full py-2 px-4 rounded-md text-sm font-medium">가치</button>
+                    <button data-tab="frequency" class="tab-link w-full py-2 px-4 rounded-md text-sm font-medium">빈도</button>
+                    <button data-tab="growth" class="tab-link w-full py-2 px-4 rounded-md text-sm font-medium">성장</button>
+                    <button data-tab="efficiency" class="tab-link w-full py-2 px-4 rounded-md text-sm font-medium">효율</button>
+                </div>
+            </div>
+
+            <div id="keyword-content">
+                <div id="tab-content-value" class="keyword-tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div class="kpi-card p-6">
+                             <h3 class="text-xl font-bold text-center mb-4">가치 상위 키워드 (총 모금액)</h3>
+                            <div class="chart-container">
+                                <canvas id="valueKeywordsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="prose max-w-none">
+                            <h4 class="font-bold text-lg">가치 키워드 인사이트</h4>
+                            <p>'한복', '생활한복', '전통' 키워드가 총 펀딩액의 상당 부분을 차지하며, 한국적 정체성을 담은 패션 아이템이 여전히 강력한 소구력을 가지고 있음을 증명합니다. '가방'과 '향수'는 스테디셀러 카테고리로 안정적인 시장을 형성하고 있습니다.</p>
+                             <ul class="mt-4 space-y-2">
+                                <li><strong>한복:</strong> 16.8억 원</li>
+                                <li><strong>생활한복:</strong> 12.2억 원</li>
+                                <li><strong>전통:</strong> 11.9억 원</li>
+                                <li><strong>가방:</strong> 10.9억 원</li>
+                                <li><strong>향수:</strong> 8.7억 원</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-content-frequency" class="keyword-tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div class="kpi-card p-6">
+                             <h3 class="text-xl font-bold text-center mb-4">빈도 상위 키워드 (프로젝트 수)</h3>
+                             <div class="chart-container">
+                                <canvas id="frequencyKeywordsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="prose max-w-none">
+                            <h4 class="font-bold text-lg">빈도 키워드 인사이트</h4>
+                            <p>'향수'는 가장 많은 수의 프로젝트가 개설된 키워드로, 진입 장벽이 낮고 소규모 시도가 활발함을 시사합니다. '한복', '전통' 역시 다수의 프로젝트가 진행되며, '선물', '목걸이' 등 액세서리 키워드도 높은 빈도를 보여줍니다.</p>
+                             <ul class="mt-4 space-y-2">
+                                <li><strong>향수:</strong> 226개</li>
+                                <li><strong>한복:</strong> 194개</li>
+                                <li><strong>전통:</strong> 166개</li>
+                                <li><strong>선물:</strong> 138개</li>
+                                <li><strong>목걸이:</strong> 130개</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-content-growth" class="keyword-tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="kpi-card p-6">
+                             <h3 class="text-xl font-bold text-center mb-4">펀딩액 성장 키워드 (YoY)</h3>
+                             <div class="chart-container h-72 md:h-80">
+                                <canvas id="growthValueKeywordsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="kpi-card p-6">
+                             <h3 class="text-xl font-bold text-center mb-4">빈도 성장 키워드 (YoY)</h3>
+                             <div class="chart-container h-72 md:h-80">
+                                <canvas id="growthFrequencyKeywordsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-content-efficiency" class="keyword-tab-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold">효율 키워드 (프로젝트당/후원자당)</h3>
+                        <p class="text-gray-500 mt-2">어떤 키워드가 가장 높은 가치를 창출할까요?</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="kpi-card p-6 text-center">
+                            <h4 class="text-lg font-bold">생활한복</h4>
+                            <p class="mt-2 text-gray-600">프로젝트당 <span class="font-semibold text-[#1E6B82]">1.2억 원</span></p>
+                            <p class="text-gray-600">1인당 <span class="font-semibold text-[#1E6B82]">18.5만 원</span></p>
+                        </div>
+                        <div class="kpi-card p-6 text-center">
+                            <h4 class="text-lg font-bold">한복</h4>
+                            <p class="mt-2 text-gray-600">프로젝트당 <span class="font-semibold text-[#1E6B82]">0.9억 원</span></p>
+                            <p class="text-gray-600">1인당 <span class="font-semibold text-[#1E6B82]">15.2만 원</span></p>
+                        </div>
+                        <div class="kpi-card p-6 text-center">
+                            <h4 class="text-lg font-bold">가방</h4>
+                            <p class="mt-2 text-gray-600">프로젝트당 <span class="font-semibold text-[#1E6B82]">0.9억 원</span></p>
+                            <p class="text-gray-600">1인당 <span class="font-semibold text-[#1E6B82]">10.6만 원</span></p>
+                        </div>
+                         <div class="kpi-card p-6 text-center">
+                            <h4 class="text-lg font-bold">전통</h4>
+                            <p class="mt-2 text-gray-600">프로젝트당 <span class="font-semibold text-[#1E6B82]">0.7억 원</span></p>
+                            <p class="text-gray-600">1인당 <span class="font-semibold text-[#1E6B82]">11.0만 원</span></p>
+                        </div>
+                        <div class="kpi-card p-6 text-center">
+                            <h4 class="text-lg font-bold">향수</h4>
+                            <p class="mt-2 text-gray-600">프로젝트당 <span class="font-semibold text-[#1E6B82]">0.4억 원</span></p>
+                            <p class="text-gray-600">1인당 <span class="font-semibold text-[#1E6B82]">6.3만 원</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="scroll-mt-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">전략 및 시사점</h2>
+                <p class="mt-4 text-lg text-gray-500 max-w-3xl mx-auto">데이터 분석을 통해 도출된 핵심 인사이트를 바탕으로, 미래 성장을 위한 세 가지 전략 방향과 구체적인 기획 아이디어를 제안합니다.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-lg font-bold mb-2 text-[#1E6B82]">🎯 마케팅 전략</h4>
+                        <p class="text-gray-600">전통·한복 키워드에 집중하고, 해외 및 문화유산과 연계한 기획전을 검토하여 새로운 고객층을 유입시킬 필요가 있습니다.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-2 text-[#1E6B82]">📦 상품 전략</h4>
+                        <p class="text-gray-600">안정적인 수요를 보이는 프리미엄 액세서리, 향기, 가방 등 소품 라인업을 확대하여 객단가를 높이는 전략이 유효합니다.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-2 text-[#1E6B82]">💰 가격 전략</h4>
+                        <p class="text-gray-600">고객층을 세분화하여 프리미엄(10~30만 원대)과 미드레인지(5~10만 원대)로 가격을 이원화하는 전략을 고려할 수 있습니다.</p>
+                    </div>
+                </div>
+                <hr class="my-8">
+                <div>
+                     <h4 class="text-lg font-bold mb-4 text-center text-[#1E6B82]">🚀 기획 아이디어 제안</h4>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
+                        <div class="p-4 bg-stone-100 rounded-lg">"전통 패션 × 현대 소품" 융합 기획전</div>
+                        <div class="p-4 bg-stone-100 rounded-lg">팬덤 기반 굿즈 패션 콜라보</div>
+                        <div class="p-4 bg-stone-100 rounded-lg">리빙·패션 결합 프로모션</div>
+                     </div>
+                </div>
+
+                <div class="mt-10">
+                    <h4 class="text-lg font-bold text-center mb-4 text-[#1E6B82]">AI 기반 기획 아이디어 생성기</h4>
+                    <div class="flex flex-col items-center">
+                        <button id="generate-ideas-btn" class="flex items-center justify-center bg-[#1E6B82] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#155364] transition-colors duration-300">
+                            <span class="mr-2 text-xl">✨</span> 새로운 기획 아이디어 얻기
+                        </button>
+                    </div>
+                    <div id="idea-output" class="mt-8 p-6 bg-stone-100 rounded-lg shadow-inner min-h-[100px] flex flex-col justify-center text-gray-500 text-sm">
+                        <div class="flex items-center justify-center h-full">버튼을 눌러 새로운 기획 아이디어를 받아보세요.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center p-6 bg-teal-50 border-l-4 border-[#1E6B82] rounded-r-lg">
+                <p class="font-semibold text-xl text-gray-700">"패션은 대형 유행이 사라진 대신, <span class="text-[#1E6B82]">정체성</span>과 <span class="text-[#1E6B82]">소품</span>으로 살아남았다."</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white mt-16 border-t">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Tumblbug Trend Insight Report. All data is based on the provided report.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chartFontColor = '#383838';
+            const chartGridColor = '#EAEAEA';
+            const primaryColor = '#1E6B82';
+            const secondaryColor = '#F2A478';
+            const accentColors = ['#1E6B82', '#5A96A8', '#97C4D1', '#F2A478', '#F8D1BE'];
+
+            const chartDefaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: chartFontColor,
+                            font: {
+                                family: "'Noto Sans KR', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: {
+                            family: "'Noto Sans KR', sans-serif"
+                        },
+                        titleFont: {
+                            family: "'Noto Sans KR', sans-serif"
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: chartFontColor,
+                            font: {
+                                family: "'Noto Sans KR', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: chartFontColor,
+                            font: {
+                                family: "'Noto Sans KR', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    }
+                }
+            };
+
+            const horizontalChartOptions = {
+                ...chartDefaultOptions,
+                indexAxis: 'y',
+                scales: {
+                     x: {
+                        ticks: {
+                            color: chartFontColor,
+                             font: {
+                                family: "'Noto Sans KR', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: chartFontColor,
+                            font: {
+                                family: "'Noto Sans KR', sans-serif",
+                                size: 10
+                            },
+                            autoSkip: false,
+                            callback: function(value) {
+                                const label = this.getLabelForValue(value);
+                                if (label.length > 16) {
+                                    return label.substring(0, 16) + '...';
+                                }
+                                return label;
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            };
+
+            new Chart(document.getElementById('fundingComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2024년', '2025년'],
+                    datasets: [{
+                        label: '총 펀딩액 (억 원)',
+                        data: [84.6, 61.6],
+                        backgroundColor: [accentColors[1], accentColors[0]],
+                        borderColor: [accentColors[1], accentColors[0]],
+                        borderWidth: 1
+                    }]
+                },
+                options: chartDefaultOptions
+            });
+
+            new Chart(document.getElementById('topProjectsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['<시든 꽃에 눈물을> 향기', '천의나래장옷 3세대', '<신개념 멀티보호대>', '마이스테이지백 V2', '손목보호대'],
+                    datasets: [{
+                        label: '펀딩액 (억 원)',
+                        data: [2.1, 2.0, 1.2, 0.9, 0.9],
+                        backgroundColor: accentColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: horizontalChartOptions
+            });
+            
+            new Chart(document.getElementById('valueKeywordsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['한복', '생활한복', '전통', '가방', '향수'],
+                    datasets: [{
+                        label: '가치 상위 키워드 (억 원)',
+                        data: [16.8, 12.2, 11.9, 10.9, 8.7],
+                        backgroundColor: accentColors,
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...chartDefaultOptions, scales: {} }
+            });
+
+            new Chart(document.getElementById('frequencyKeywordsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['향수', '한복', '전통', '선물', '목걸이'],
+                    datasets: [{
+                        label: '프로젝트 수 (개)',
+                        data: [226, 194, 166, 138, 130],
+                        backgroundColor: accentColors,
+                    }]
+                },
+                 options: horizontalChartOptions
+            });
+
+            new Chart(document.getElementById('growthValueKeywordsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['메리제인', '보호대', '커스텀', '민화', '한복가방'],
+                    datasets: [{
+                        label: 'YoY 증가율 (%)',
+                        data: [1405, 989, 626, 544, 502],
+                        backgroundColor: accentColors,
+                    }]
+                },
+                options: horizontalChartOptions
+            });
+            
+            new Chart(document.getElementById('growthFrequencyKeywordsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['탄생석', '한복셋업', '사주', '카인', '센트라이브러리', '한국전통', '마녀', '신서울', '생일선물', '나비'],
+                    datasets: [{
+                        label: 'YoY 빈도 증가율 (%)',
+                        data: [188, 183, 180, 157, 150, 140, 129, 122, 117, 114],
+                        backgroundColor: accentColors,
+                    }]
+                },
+                options: horizontalChartOptions
+            });
+
+            const tabs = document.querySelectorAll('.tab-link');
+            const contents = document.querySelectorAll('.keyword-tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    contents.forEach(content => {
+                        if (content.id === `tab-content-${target}`) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            const generateIdeasBtn = document.getElementById('generate-ideas-btn');
+            const ideaOutputDiv = document.getElementById('idea-output');
+
+            generateIdeasBtn.addEventListener('click', async () => {
+                ideaOutputDiv.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">아이디어를 생성 중입니다...</div>';
+                
+                const prompt = {
+                    contents: [{
+                        parts: [{
+                            text: `
+                            다음 텀블벅 패션 트렌드 보고서 데이터를 분석하여, 전통, 프리미엄 소품, 그리고 '메리제인'과 '보호대' 키워드의 성장을 활용한 창의적이고 실행 가능한 세 가지 프로젝트 아이디어를 제안해 주세요.
+                            
+                            보고서 요약:
+                            - 전체 시장: -27% 감소, 중소형 프로젝트 분산.
+                            - 주요 키워드: 한복, 생활한복, 전통 (여전히 강세).
+                            - 성장 키워드: 메리제인 (+1405%), 보호대 (+989%).
+                            - 주요 성공 사례: '향기' (2.1억), '한복' (2.0억).
+                            - 효율 키워드: 생활한복 (프로젝트당 1.2억).
+                            
+                            결과 포맷:
+                            각 아이디어는 프로젝트 제목과 간략한 설명으로 구성해 주세요.
+                            `
+                        }]
+                    }],
+                    model: "gemini-2.5-flash-preview-05-20"
+                };
+
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    
+                    let response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(prompt)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                        const generatedText = result.candidates[0].content.parts[0].text;
+                        const lines = generatedText.split('\n').filter(line => line.trim() !== '');
+                        let formattedHtml = '';
+                        let isFirstLine = true;
+                        
+                        lines.forEach(line => {
+                            if (line.startsWith('**') && line.endsWith('**')) {
+                                if (!isFirstLine) {
+                                    formattedHtml += '</div>';
+                                }
+                                formattedHtml += `<div class="mb-4">
+                                                    <h5 class="text-lg font-bold text-gray-800">${line.replace(/\*\*/g, '')}</h5>`;
+                                isFirstLine = false;
+                            } else {
+                                formattedHtml += `<p class="text-gray-600 mt-1">${line}</p>`;
+                            }
+                        });
+                        formattedHtml += '</div>';
+                        
+                        ideaOutputDiv.innerHTML = formattedHtml;
+                    } else {
+                        ideaOutputDiv.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">아이디어 생성에 실패했습니다. 다시 시도해 주세요.</div>';
+                    }
+                } catch (error) {
+                    ideaOutputDiv.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</div>';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
